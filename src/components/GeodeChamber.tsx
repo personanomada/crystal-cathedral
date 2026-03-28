@@ -51,12 +51,24 @@ export function GeodeChamber() {
     }
 
     // Flip face winding
-    const index = geo.index!
-    for (let i = 0; i < index.count; i += 3) {
-      const a = index.getX(i)
-      const c = index.getX(i + 2)
-      index.setX(i, c)
-      index.setX(i + 2, a)
+    if (geo.index) {
+      const index = geo.index
+      for (let i = 0; i < index.count; i += 3) {
+        const a = index.getX(i)
+        const c = index.getX(i + 2)
+        index.setX(i, c)
+        index.setX(i + 2, a)
+      }
+    } else {
+      // Non-indexed geometry: swap vertices in each triangle
+      const pos2 = geo.attributes.position
+      for (let i = 0; i < pos2.count; i += 3) {
+        // Swap first and third vertex of each face
+        const ax = pos2.getX(i), ay = pos2.getY(i), az = pos2.getZ(i)
+        const cx = pos2.getX(i + 2), cy = pos2.getY(i + 2), cz = pos2.getZ(i + 2)
+        pos2.setXYZ(i, cx, cy, cz)
+        pos2.setXYZ(i + 2, ax, ay, az)
+      }
     }
 
     return geo
@@ -68,7 +80,7 @@ export function GeodeChamber() {
         color="#1a1a2e"
         roughness={0.9}
         metalness={0.1}
-        side={THREE.FrontSide}
+        side={THREE.DoubleSide}
       />
     </mesh>
   )
