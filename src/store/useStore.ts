@@ -40,6 +40,8 @@ interface Store {
   setBreathPhase: (p: number) => void
   sessionElapsed: number
   setSessionElapsed: (t: number) => void
+  introComplete: boolean
+  setIntroComplete: (v: boolean) => void
   settings: Settings
   setSetting: <K extends keyof Settings>(key: K, value: Settings[K]) => void
 }
@@ -58,6 +60,8 @@ export const useStore = create<Store>()((set) => ({
   setBreathPhase: (p) => set({ breathPhase: p }),
   sessionElapsed: 0,
   setSessionElapsed: (t) => set({ sessionElapsed: t }),
+  introComplete: false,
+  setIntroComplete: (v) => set({ introComplete: v }),
   settings: {
     audioMode: 'drone',
     volume: 0.65,

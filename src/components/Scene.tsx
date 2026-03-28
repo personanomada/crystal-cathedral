@@ -4,6 +4,7 @@ import { SacredMandala } from './SacredMandala'
 import { LightingRig } from './LightingRig'
 import { ParticleField } from './ParticleField'
 import { PostProcessing } from './PostProcessing'
+import { LoveMessage } from './LoveMessage'
 import { BreathingPulse } from '../systems/BreathingPulse'
 import { ReactivityEngine } from '../systems/ReactivityEngine'
 import { AdaptiveQuality } from '../systems/AdaptiveQuality'
@@ -12,12 +13,10 @@ import { GazeDrift } from '../interaction/GazeDrift'
 import { GazeFocus } from '../interaction/GazeFocus'
 import { HandInteraction } from '../interaction/HandInteraction'
 import { AudioManager } from '../audio/AudioManager'
-import { LoveMessage } from './LoveMessage'
-
 export function Scene() {
   return (
     <>
-      {/* Systems */}
+      {/* Systems — always running */}
       <BreathingPulse />
       <ReactivityEngine />
       <AdaptiveQuality />
@@ -26,13 +25,16 @@ export function Scene() {
       <GazeFocus />
       <HandInteraction />
       <AudioManager />
-      {/* Scene elements */}
+
+      {/* Love message intro — shows first, then triggers scene reveal */}
+      <LoveMessage />
+
+      {/* Cathedral scene — fades in after intro */}
       <LightingRig />
       <GeodeChamber />
       <Crystals />
       <SacredMandala />
       <ParticleField />
-      <LoveMessage />
       <PostProcessing />
     </>
   )
