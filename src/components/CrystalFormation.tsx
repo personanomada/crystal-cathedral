@@ -8,61 +8,43 @@ import {
   CrystalPlacement,
 } from '../utils/crystalDistribution'
 import { getActiveThemeColors } from './LightingRig'
-import type { GLTF } from 'three-stdlib'
 
-// -------------------------------------------------------------------------
-// Type helpers
-// -------------------------------------------------------------------------
-type CrystalPackGLTF = GLTF & {
-  nodes: Record<string, THREE.Mesh>
-  materials: Record<string, THREE.Material>
-}
-
-const CRYSTAL_COUNT = 600
+const CRYSTAL_COUNT = 400
 const TEMP_OBJECT = new THREE.Object3D()
 const TEMP_COLOR = new THREE.Color()
 
-// -------------------------------------------------------------------------
-// Fallback procedural geometries (used until model loads or if it fails)
-// -------------------------------------------------------------------------
-function createCrystalGeometry(scaleY: number, baseRadius: number): THREE.BufferGeometry {
-  const geo = new THREE.OctahedronGeometry(baseRadius, 0)
-  const pos = geo.attributes.position as THREE.BufferAttribute
+// We use 3 different crystal geometries from the model pack.
+// These are mesh child node names (Object_N) from crystal_pack/scene.gltf:
+//   Sharp family: pointed single crystals (~2-3 units tall)
+//   Crystal family: crystal clusters (~2-3 units tall)
+//   Standing family: upright formations (~2 units tall)
+const MODEL_NODES = ['Object_4', 'Object_132', 'Object_408']
+
+// Color palettes for crystal variety
+const CRYSTAL_HUES = [
+  { h: 0.75, s: 0.8, l: 0.35 },
+  { h: 0.78, s: 0.7, l: 0.40 },
+  { h: 0.72, s: 0.9, l: 0.30 },
+  { h: 0.55, s: 0.65, l: 0.38 },
+  { h: 0.85, s: 0.75, l: 0.38 },
+  { h: 0.60, s: 0.55, l: 0.45 },
+]
+
+// Fallback procedural geometry
+function createFallbackGeometry(scaleY: number, radius: number): THREE.BufferGeometry {
+  const geo = new THREE.OctahedronGeometry(radius, 0)
+  const pos = geo.attributes.position
   for (let i = 0; i < pos.count; i++) {
     pos.setY(i, pos.getY(i) * scaleY)
   }
-  geo.translate(0, baseRadius * scaleY, 0)
+  geo.translate(0, radius * scaleY, 0)
   geo.computeVertexNormals()
   return geo
 }
 
-// Procedural fallback shapes for groups 0 and 1
-const FALLBACK_GEOMETRIES = [
-  () => createCrystalGeometry(3.0, 0.08), // Tall thin
-  () => createCrystalGeometry(2.0, 0.11), // Medium
-]
-
-// Model mesh node name for group 2 — the "Crystal1.1" shape from crystal_pack
-// Object_132 is the mesh child of Crystal1.1_64 parent node
-const MODEL_CRYSTAL_NODE = 'Object_132'
-
-// -------------------------------------------------------------------------
-// Color palettes
-// -------------------------------------------------------------------------
-const CRYSTAL_HUES = [
-  { h: 0.75, s: 0.8, l: 0.35 },  // Vivid purple
-  { h: 0.78, s: 0.7, l: 0.40 },  // Bright blue-purple
-  { h: 0.72, s: 0.9, l: 0.30 },  // Deep saturated violet
-  { h: 0.55, s: 0.65, l: 0.38 }, // Vivid teal
-  { h: 0.85, s: 0.75, l: 0.38 }, // Hot pink-purple
-  { h: 0.60, s: 0.55, l: 0.45 }, // Sky blue
-]
-
 export function CrystalFormation() {
   const meshRefs = useRef<(THREE.InstancedMesh | null)[]>([])
-
-  // Load the crystal_pack model to borrow a geometry for group 2
-  const gltf = useGLTF('/models/crystal_pack/scene.gltf') as CrystalPackGLTF
+  const gltf = useGLTF('/models/crystal_pack/scene.gltf')
 
   const allPlacements = useMemo(() => generateCrystalPlacements(CRYSTAL_COUNT), [])
   const groups = useMemo(() => {
@@ -71,26 +53,32 @@ export function CrystalFormation() {
     return g
   }, [allPlacements])
 
-  // Build the 3 geometries: 2 procedural + 1 from loaded model
+  // Extract model geometries or fall back to procedural
   const geometries = useMemo(() => {
-    const procedural = FALLBACK_GEOMETRIES.map((fn) => fn())
-
-    // Try to get the model geometry for group 2
-    let modelGeo: THREE.BufferGeometry | null = null
-    try {
-      const node = gltf?.nodes?.[MODEL_CRYSTAL_NODE]
-      if (node && node.geometry) {
-        modelGeo = node.geometry as THREE.BufferGeometry
+    return MODEL_NODES.map((nodeName, i) => {
+      const node = (gltf as any)?.nodes?.[nodeName]
+      if (node?.geometry) {
+        // Clone and normalize the geometry so it's centered and scaled consistently
+        const geo = (node.geometry as THREE.BufferGeometry).clone()
+        geo.computeBoundingBox()
+        const box = geo.boundingBox!
+        const height = box.max.y - box.min.y
+        // Normalize to roughly 1 unit tall so our placement scales work
+        const scaleFactor = 1 / height
+        geo.scale(scaleFactor, scaleFactor, scaleFactor)
+        // Center on XZ, base at Y=0
+        geo.computeBoundingBox()
+        const newBox = geo.boundingBox!
+        geo.translate(
+          -(newBox.min.x + newBox.max.x) / 2,
+          -newBox.min.y,
+          -(newBox.min.z + newBox.max.z) / 2,
+        )
+        return geo
       }
-    } catch {
-      // ignore — will fall back to procedural
-    }
-
-    return [
-      procedural[0],
-      procedural[1],
-      modelGeo ?? createCrystalGeometry(1.5, 0.13), // stubby fallback
-    ]
+      // Fallback
+      return createFallbackGeometry([3, 2, 1.5][i], [0.08, 0.11, 0.13][i])
+    })
   }, [gltf])
 
   useEffect(() => {
@@ -115,7 +103,7 @@ export function CrystalFormation() {
       mesh.instanceMatrix.needsUpdate = true
       if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true
     })
-  }, [groups])
+  }, [groups, geometries])
 
   useFrame(() => {
     const breathPhase = useStore.getState().breathPhase
@@ -161,5 +149,4 @@ export function CrystalFormation() {
   )
 }
 
-// Preload — shared with HeroCrystals so there's no double fetch
 useGLTF.preload('/models/crystal_pack/scene.gltf')

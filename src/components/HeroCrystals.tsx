@@ -6,66 +6,54 @@ import { useStore } from '../store/useStore'
 import { generateCrystalPlacements } from '../utils/crystalDistribution'
 import { CONFIG } from '../config'
 import { getActiveThemeColors } from './LightingRig'
-import type { GLTF } from 'three-stdlib'
 
-// -------------------------------------------------------------------------
-// Type helpers for the crystal_pack GLTF
-// -------------------------------------------------------------------------
-type CrystalPackGLTF = GLTF & {
-  nodes: Record<string, THREE.Mesh>
-  materials: Record<string, THREE.Material>
-}
-
-/**
- * Fallback geometry used when the model hasn't loaded yet.
- * Vertically stretched OctahedronGeometry — same shape as the old procedural crystal.
- */
-function createFallbackGeometry(scaleY = 2.5, baseRadius = 0.18): THREE.BufferGeometry {
-  const geo = new THREE.OctahedronGeometry(baseRadius, 0)
-  const pos = geo.attributes.position as THREE.BufferAttribute
-  for (let i = 0; i < pos.count; i++) {
-    pos.setY(i, pos.getY(i) * scaleY)
-  }
-  geo.translate(0, baseRadius * scaleY, 0)
-  geo.computeVertexNormals()
-  return geo
-}
-
-// Three mesh node names from crystal_pack that give us nice elongated crystal shapes.
-// Sharp family: sharp-pointed individual crystals (perfect hero shapes).
-// We use 3 different ones to give variety across the hero placements.
-const HERO_MODEL_NODES = ['Object_48', 'Object_132', 'Object_408'] // Sharp1.1, Crystal1.1, Standing1.1
+// Use 3 visually distinct crystal shapes from the model pack
+// Sharp = pointed, Crystal = clustered, Standing = upright
+const HERO_MODEL_NODES = ['Object_4', 'Object_132', 'Object_408']
 
 export function HeroCrystals() {
   const materialsRef = useRef<THREE.MeshPhysicalMaterial[]>([])
   const qualityTier = useStore((s) => s.qualityTier)
   const heroCount = CONFIG.quality[qualityTier].heroCount
-
-  // Load the crystal_pack model — it has clearly named nodes
-  const gltf = useGLTF('/models/crystal_pack/scene.gltf') as CrystalPackGLTF
+  const gltf = useGLTF('/models/crystal_pack/scene.gltf')
 
   const heroData = useMemo(() => {
-    const allPlacements = generateCrystalPlacements(600, 42)
+    const allPlacements = generateCrystalPlacements(400, 42)
     const playerPos = new THREE.Vector3(0, -CONFIG.cathedral.radiusY * 0.35, 0)
-    const sorted = allPlacements.sort(
+    const sorted = [...allPlacements].sort(
       (a, b) => a.position.distanceTo(playerPos) - b.position.distanceTo(playerPos),
     )
     return sorted.slice(0, 15)
   }, [])
 
-  // Resolve geometries: try to pull from the loaded model, fall back to procedural
+  // Extract and normalize model geometries
   const geometries = useMemo(() => {
-    const fallback = createFallbackGeometry(2.5, 0.18)
     return HERO_MODEL_NODES.map((nodeName) => {
-      try {
-        const node = gltf?.nodes?.[nodeName]
-        if (node && node.geometry) {
-          return node.geometry as THREE.BufferGeometry
-        }
-      } catch {
-        // ignore
+      const node = (gltf as any)?.nodes?.[nodeName]
+      if (node?.geometry) {
+        const geo = (node.geometry as THREE.BufferGeometry).clone()
+        geo.computeBoundingBox()
+        const box = geo.boundingBox!
+        const height = box.max.y - box.min.y
+        // Normalize to ~1.5 units tall for hero crystals
+        const scaleFactor = 1.5 / height
+        geo.scale(scaleFactor, scaleFactor, scaleFactor)
+        geo.computeBoundingBox()
+        const newBox = geo.boundingBox!
+        geo.translate(
+          -(newBox.min.x + newBox.max.x) / 2,
+          -newBox.min.y,
+          -(newBox.min.z + newBox.max.z) / 2,
+        )
+        return geo
       }
-      return fallback
+      // Fallback
+      const geo = new THREE.OctahedronGeometry(0.18, 0)
+      const pos = geo.attributes.position
+      for (let i = 0; i < pos.count; i++) pos.setY(i, pos.getY(i) * 2.5)
+      geo.translate(0, 0.45, 0)
+      geo.computeVertexNormals()
+      return geo
     })
   }, [gltf])
 
@@ -86,46 +74,41 @@ export function HeroCrystals() {
 
   return (
     <group>
-      {heroData.slice(0, heroCount).map((placement, i) => {
-        // Cycle through the 3 model geometries for visual variety
-        const geo = geometries[i % geometries.length]
-        return (
-          <mesh
-            key={i}
-            geometry={geo}
-            position={placement.position}
-            rotation={placement.rotation}
-            scale={placement.scale.clone().multiplyScalar(1.5)}
-          >
-            <meshPhysicalMaterial
-              ref={(mat) => {
-                if (mat) materialsRef.current[i] = mat
-              }}
-              color="#b8b0ff"
-              transmission={0.9}
-              thickness={2.0}
-              roughness={0.05}
-              ior={2.2}
-              iridescence={1}
-              iridescenceIOR={1.5}
-              iridescenceThicknessRange={[100, 400]}
-              attenuationColor="#6c5ce7"
-              attenuationDistance={1.0}
-              emissive="#6c5ce7"
-              emissiveIntensity={0.5}
-              transparent
-              envMapIntensity={3.0}
-              metalness={0.1}
-              specularIntensity={1}
-              clearcoat={1}
-              clearcoatRoughness={0.05}
-            />
-          </mesh>
-        )
-      })}
+      {heroData.slice(0, heroCount).map((placement, i) => (
+        <mesh
+          key={i}
+          geometry={geometries[i % geometries.length]}
+          position={placement.position}
+          rotation={placement.rotation}
+          scale={placement.scale.clone().multiplyScalar(1.2)}
+        >
+          <meshPhysicalMaterial
+            ref={(mat) => {
+              if (mat) materialsRef.current[i] = mat
+            }}
+            color="#c0b8ff"
+            transmission={0.85}
+            thickness={2.0}
+            roughness={0.02}
+            ior={2.2}
+            iridescence={1}
+            iridescenceIOR={1.5}
+            iridescenceThicknessRange={[100, 400]}
+            attenuationColor="#6c5ce7"
+            attenuationDistance={1.5}
+            emissive="#6c5ce7"
+            emissiveIntensity={0.5}
+            transparent
+            envMapIntensity={3.0}
+            metalness={0.05}
+            specularIntensity={1}
+            clearcoat={1}
+            clearcoatRoughness={0.02}
+          />
+        </mesh>
+      ))}
     </group>
   )
 }
 
-// Preload for fast initial render
 useGLTF.preload('/models/crystal_pack/scene.gltf')
