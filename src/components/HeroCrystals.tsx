@@ -7,72 +7,19 @@ import { CONFIG } from '../config'
 import { getActiveThemeColors } from './LightingRig'
 
 /**
- * Create a crystal cluster: main crystal with 2-3 smaller ones at the base.
+ * Create a hero crystal geometry using a vertically stretched OctahedronGeometry.
+ * Matches the instanced CrystalFormation approach but at larger scale.
+ * scaleY controls how elongated/pointy the crystal looks.
  */
-function createHeroCrystalGeometry(): THREE.BufferGeometry {
-  const main = new THREE.ConeGeometry(0.15, 1.8, 6, 1)
-  main.translate(0, 0.9, 0)
-
-  const side1 = new THREE.ConeGeometry(0.08, 1.0, 6, 1)
-  side1.rotateZ(0.3)
-  side1.translate(0.15, 0.4, 0.05)
-
-  const side2 = new THREE.ConeGeometry(0.07, 0.8, 6, 1)
-  side2.rotateZ(-0.25)
-  side2.translate(-0.12, 0.3, 0.1)
-
-  // Merge using mergeGeometries
-  const merged = mergeBufferGeometries([main, side1, side2])
-  main.dispose()
-  side1.dispose()
-  side2.dispose()
-  return merged
-}
-
-function mergeBufferGeometries(geometries: THREE.BufferGeometry[]): THREE.BufferGeometry {
-  let totalVerts = 0
-  let totalIndices = 0
-  for (const g of geometries) {
-    totalVerts += g.attributes.position.count
-    totalIndices += g.index ? g.index.count : g.attributes.position.count
+function createHeroCrystalGeometry(scaleY: number = 2.5, baseRadius: number = 0.18): THREE.BufferGeometry {
+  const geo = new THREE.OctahedronGeometry(baseRadius, 0)
+  const pos = geo.attributes.position
+  for (let i = 0; i < pos.count; i++) {
+    pos.setY(i, pos.getY(i) * scaleY)
   }
-
-  const positions = new Float32Array(totalVerts * 3)
-  const normals = new Float32Array(totalVerts * 3)
-  const indices = new Uint16Array(totalIndices)
-
-  let vertOffset = 0
-  let idxOffset = 0
-  for (const g of geometries) {
-    const pos = g.attributes.position
-    const norm = g.attributes.normal
-    for (let i = 0; i < pos.count; i++) {
-      positions[(vertOffset + i) * 3] = pos.getX(i)
-      positions[(vertOffset + i) * 3 + 1] = pos.getY(i)
-      positions[(vertOffset + i) * 3 + 2] = pos.getZ(i)
-      normals[(vertOffset + i) * 3] = norm.getX(i)
-      normals[(vertOffset + i) * 3 + 1] = norm.getY(i)
-      normals[(vertOffset + i) * 3 + 2] = norm.getZ(i)
-    }
-    if (g.index) {
-      for (let i = 0; i < g.index.count; i++) {
-        indices[idxOffset + i] = g.index.getX(i) + vertOffset
-      }
-      idxOffset += g.index.count
-    } else {
-      for (let i = 0; i < pos.count; i++) {
-        indices[idxOffset + i] = vertOffset + i
-      }
-      idxOffset += pos.count
-    }
-    vertOffset += pos.count
-  }
-
-  const merged = new THREE.BufferGeometry()
-  merged.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-  merged.setAttribute('normal', new THREE.BufferAttribute(normals, 3))
-  merged.setIndex(new THREE.BufferAttribute(indices, 1))
-  return merged
+  geo.translate(0, baseRadius * scaleY, 0)
+  geo.computeVertexNormals()
+  return geo
 }
 
 export function HeroCrystals() {
@@ -94,7 +41,7 @@ export function HeroCrystals() {
     return sorted.slice(0, 15)
   }, [])
 
-  const geometry = useMemo(() => createHeroCrystalGeometry(), [])
+  const geometry = useMemo(() => createHeroCrystalGeometry(2.5, 0.18), [])
 
   useFrame(() => {
     const breathPhase = useStore.getState().breathPhase
@@ -125,18 +72,20 @@ export function HeroCrystals() {
             ref={(mat) => {
               if (mat) materialsRef.current[i] = mat
             }}
-            color="#8875d8"
+            color="#b8b0ff"
             transmission={0.9}
-            thickness={1.2}
+            thickness={2.0}
             roughness={0.05}
             ior={2.2}
             iridescence={1}
             iridescenceIOR={1.5}
             iridescenceThicknessRange={[100, 400]}
+            attenuationColor="#6c5ce7"
+            attenuationDistance={1.0}
             emissive="#6c5ce7"
             emissiveIntensity={0.5}
             transparent
-            envMapIntensity={2}
+            envMapIntensity={3.0}
             metalness={0.1}
             specularIntensity={1}
             clearcoat={1}

@@ -39,6 +39,9 @@ export function LightingRig() {
       new THREE.Vector3(4, 4, -2),
       new THREE.Vector3(-3, 6, 3),
       new THREE.Vector3(3, 0, 4),
+      // Two additional ceiling vault lights
+      new THREE.Vector3(0, 9, -2),
+      new THREE.Vector3(0, 10, 2),
     ],
     [],
   )
@@ -49,18 +52,18 @@ export function LightingRig() {
     const themeKey = useStore.getState().settings.theme
     const theme = getActiveThemeColors(themeKey, elapsed)
     if (ambientRef.current) {
-      ambientRef.current.intensity = 0.05 + sessionDepth * 0.1
+      ambientRef.current.intensity = 0.08 + sessionDepth * 0.1
     }
     lightsRef.current.forEach((light, i) => {
       if (!light) return
       light.color.copy(theme.lights[i % theme.lights.length])
-      light.intensity = 0.5 + sessionDepth * 2.5
+      light.intensity = 1.0 + sessionDepth * 4
     })
   })
 
   return (
     <>
-      <ambientLight ref={ambientRef} intensity={0.05} />
+      <ambientLight ref={ambientRef} intensity={0.08} />
       {lightPositions.map((pos, i) => (
         <pointLight
           key={i}
@@ -68,12 +71,12 @@ export function LightingRig() {
             if (el) lightsRef.current[i] = el
           }}
           position={pos}
-          intensity={0.5}
-          distance={15}
+          intensity={1.0}
+          distance={25}
           decay={2}
         />
       ))}
-      <Environment preset="studio" environmentIntensity={0.4} background={false} />
+      <Environment preset="sunset" environmentIntensity={0.5} background={false} />
     </>
   )
 }

@@ -77,9 +77,9 @@ export function GeodeChamber() {
   return (
     <mesh geometry={geometry}>
       <meshStandardMaterial
-        color="#1a1a2e"
-        roughness={0.9}
-        metalness={0.1}
+        color="#0d0d1a"
+        roughness={0.95}
+        metalness={0.05}
         side={THREE.DoubleSide}
       />
     </mesh>

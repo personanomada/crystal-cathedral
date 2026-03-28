@@ -13,86 +13,39 @@ const TEMP_OBJECT = new THREE.Object3D()
 const TEMP_COLOR = new THREE.Color()
 
 /**
- * Create a crystal-shaped geometry: hexagonal prism body with a pointed tip.
- * Looks like a real quartz crystal point.
+ * Create a crystal-shaped geometry using a vertically stretched OctahedronGeometry.
+ * Natural crystal point shape — no manual mesh merging needed.
+ * scaleY stretches the octahedron to make it look like a crystal point.
  */
-function createCrystalGeometry(
-  radius: number,
-  bodyHeight: number,
-  tipHeight: number,
-): THREE.BufferGeometry {
-  const body = new THREE.CylinderGeometry(radius, radius * 1.05, bodyHeight, 6, 1)
-  const tip = new THREE.ConeGeometry(radius, tipHeight, 6, 1)
-  tip.translate(0, bodyHeight / 2 + tipHeight / 2, 0)
-
-  // Merge geometries
-  const merged = new THREE.BufferGeometry()
-  const bodyPos = body.attributes.position
-  const tipPos = tip.attributes.position
-  const bodyNorm = body.attributes.normal
-  const tipNorm = tip.attributes.normal
-
-  const totalVerts = bodyPos.count + tipPos.count
-  const positions = new Float32Array(totalVerts * 3)
-  const normals = new Float32Array(totalVerts * 3)
-
-  // Copy body
-  for (let i = 0; i < bodyPos.count; i++) {
-    positions[i * 3] = bodyPos.getX(i)
-    positions[i * 3 + 1] = bodyPos.getY(i)
-    positions[i * 3 + 2] = bodyPos.getZ(i)
-    normals[i * 3] = bodyNorm.getX(i)
-    normals[i * 3 + 1] = bodyNorm.getY(i)
-    normals[i * 3 + 2] = bodyNorm.getZ(i)
+function createCrystalGeometry(scaleY: number, baseRadius: number): THREE.BufferGeometry {
+  const geo = new THREE.OctahedronGeometry(baseRadius, 0)
+  // Scale the positions on Y to make it tall and pointy
+  const pos = geo.attributes.position
+  for (let i = 0; i < pos.count; i++) {
+    pos.setY(i, pos.getY(i) * scaleY)
   }
-  // Copy tip
-  const offset = bodyPos.count
-  for (let i = 0; i < tipPos.count; i++) {
-    positions[(offset + i) * 3] = tipPos.getX(i)
-    positions[(offset + i) * 3 + 1] = tipPos.getY(i)
-    positions[(offset + i) * 3 + 2] = tipPos.getZ(i)
-    normals[(offset + i) * 3] = tipNorm.getX(i)
-    normals[(offset + i) * 3 + 1] = tipNorm.getY(i)
-    normals[(offset + i) * 3 + 2] = tipNorm.getZ(i)
-  }
-
-  merged.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-  merged.setAttribute('normal', new THREE.BufferAttribute(normals, 3))
-
-  // Merge index buffers
-  const bodyIdx = body.index!
-  const tipIdx = tip.index!
-  const totalIndices = bodyIdx.count + tipIdx.count
-  const indices = new Uint16Array(totalIndices)
-  for (let i = 0; i < bodyIdx.count; i++) {
-    indices[i] = bodyIdx.getX(i)
-  }
-  for (let i = 0; i < tipIdx.count; i++) {
-    indices[bodyIdx.count + i] = tipIdx.getX(i) + offset
-  }
-  merged.setIndex(new THREE.BufferAttribute(indices, 1))
-
-  body.dispose()
-  tip.dispose()
-
-  return merged
+  // Shift so the base sits at y=0
+  geo.translate(0, baseRadius * scaleY, 0)
+  geo.computeVertexNormals()
+  return geo
 }
 
-// Three crystal types: thin pointed, chunky, needle
+// Three crystal types using stretched octahedra:
+// tall-thin, medium, stubby
 const CRYSTAL_GEOMETRIES = [
-  () => createCrystalGeometry(0.06, 0.6, 0.4),   // Thin with long tip
-  () => createCrystalGeometry(0.1, 0.5, 0.25),    // Chunky with short tip
-  () => createCrystalGeometry(0.04, 0.8, 0.5),    // Needle with sharp point
+  () => createCrystalGeometry(3.0, 0.08),  // Tall thin — stretched 3x
+  () => createCrystalGeometry(2.0, 0.11),  // Medium — stretched 2x
+  () => createCrystalGeometry(1.5, 0.13),  // Stubby — stretched 1.5x
 ]
 
-// Color palettes for crystal variety
+// Color palettes — more saturated and bright for better visual impact
 const CRYSTAL_HUES = [
-  { h: 0.75, s: 0.6, l: 0.25 },  // Purple
-  { h: 0.78, s: 0.5, l: 0.3 },   // Blue-purple
-  { h: 0.72, s: 0.7, l: 0.2 },   // Deep violet
-  { h: 0.55, s: 0.4, l: 0.3 },   // Teal
-  { h: 0.85, s: 0.5, l: 0.25 },  // Pink-purple
-  { h: 0.6, s: 0.3, l: 0.35 },   // Pale blue
+  { h: 0.75, s: 0.8, l: 0.35 },  // Vivid purple
+  { h: 0.78, s: 0.7, l: 0.40 },  // Bright blue-purple
+  { h: 0.72, s: 0.9, l: 0.30 },  // Deep saturated violet
+  { h: 0.55, s: 0.65, l: 0.38 }, // Vivid teal
+  { h: 0.85, s: 0.75, l: 0.38 }, // Hot pink-purple
+  { h: 0.60, s: 0.55, l: 0.45 }, // Sky blue
 ]
 
 export function CrystalFormation() {
@@ -161,14 +114,14 @@ export function CrystalFormation() {
           frustumCulled={false}
         >
           <meshStandardMaterial
-            color="#3d3d5c"
+            color="#5a4a8a"
             emissive="#6c5ce7"
             emissiveIntensity={0.3}
-            roughness={0.15}
-            metalness={0.6}
+            roughness={0.1}
+            metalness={0.8}
             transparent
-            opacity={0.9}
-            envMapIntensity={1.5}
+            opacity={0.95}
+            envMapIntensity={2.0}
           />
         </instancedMesh>
       ))}

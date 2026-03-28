@@ -1,114 +1,88 @@
 import { useRef, useMemo } from 'react'
 import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
+import { Sparkles } from '@react-three/drei'
 import { useStore } from '../store/useStore'
 import { CONFIG } from '../config'
+import { getActiveThemeColors } from './LightingRig'
 
-const DUST_COUNT = 500
 const ASCENDING_COUNT = 300
 
-function createParticlePositions(count: number, spread: number, yMin: number, yMax: number): Float32Array {
-  const positions = new Float32Array(count * 3)
-  for (let i = 0; i < count; i++) {
-    const i3 = i * 3
-    const angle = Math.random() * Math.PI * 2
-    const radius = Math.random() * spread
-    positions[i3] = Math.cos(angle) * radius
-    positions[i3 + 1] = yMin + Math.random() * (yMax - yMin)
-    positions[i3 + 2] = Math.sin(angle) * radius
+// Vertex shader for ascending particles
+const ascendingVertexShader = /* glsl */ `
+  uniform float uTime;
+  uniform float uSize;
+  attribute float aSpeed;
+  attribute float aOffset;
+  varying float vAlpha;
+
+  void main() {
+    vec3 pos = position;
+    vAlpha = aSpeed * 0.8;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+    gl_PointSize = uSize * (300.0 / -gl_Position.z);
   }
-  return positions
-}
+`
 
-function AmbientDust() {
-  const pointsRef = useRef<THREE.Points>(null)
-  const { radiusX, radiusY } = CONFIG.cathedral
-  const positions = useMemo(
-    () => createParticlePositions(DUST_COUNT, radiusX * 0.8, -radiusY * 0.7, radiusY * 0.8),
-    [radiusX, radiusY],
-  )
-  const velocities = useMemo(() => {
-    const v = new Float32Array(DUST_COUNT * 3)
-    for (let i = 0; i < DUST_COUNT; i++) {
-      const i3 = i * 3
-      v[i3] = (Math.random() - 0.5) * 0.02
-      v[i3 + 1] = (Math.random() - 0.5) * 0.01
-      v[i3 + 2] = (Math.random() - 0.5) * 0.02
-    }
-    return v
-  }, [])
+// Fragment shader for soft circular particles
+const ascendingFragmentShader = /* glsl */ `
+  uniform vec3 uColor;
+  uniform float uOpacity;
+  varying float vAlpha;
 
-  useFrame((_, delta) => {
-    if (!pointsRef.current) return
-    const dt = Math.min(delta, 0.1)
-    const { sessionDepth } = useStore.getState().presence
-    const pos = pointsRef.current.geometry.attributes.position as THREE.BufferAttribute
-    const arr = pos.array as Float32Array
-    for (let i = 0; i < DUST_COUNT; i++) {
-      const i3 = i * 3
-      arr[i3] += velocities[i3] * dt * 60
-      arr[i3 + 1] += velocities[i3 + 1] * dt * 60
-      arr[i3 + 2] += velocities[i3 + 2] * dt * 60
-      velocities[i3] += (Math.random() - 0.5) * 0.002
-      velocities[i3 + 1] += (Math.random() - 0.5) * 0.001
-      velocities[i3 + 2] += (Math.random() - 0.5) * 0.002
-      velocities[i3] *= 0.99
-      velocities[i3 + 1] *= 0.99
-      velocities[i3 + 2] *= 0.99
-      const dist = Math.sqrt(arr[i3] ** 2 + arr[i3 + 2] ** 2)
-      if (dist > radiusX * 0.8) {
-        velocities[i3] *= -0.5
-        velocities[i3 + 2] *= -0.5
-      }
-    }
-    pos.needsUpdate = true
-    const mat = pointsRef.current.material as THREE.PointsMaterial
-    mat.opacity = 0.2 + sessionDepth * 0.6
-  })
-
-  return (
-    <points ref={pointsRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          args={[positions, 3]}
-        />
-      </bufferGeometry>
-      <pointsMaterial
-        size={0.03}
-        color="#ffeaa7"
-        transparent
-        opacity={0.3}
-        depthWrite={false}
-        blending={THREE.AdditiveBlending}
-        sizeAttenuation
-      />
-    </points>
-  )
-}
+  void main() {
+    float dist = length(gl_PointCoord - vec2(0.5));
+    if (dist > 0.5) discard;
+    float alpha = 1.0 - smoothstep(0.2, 0.5, dist);
+    gl_FragColor = vec4(uColor, alpha * uOpacity * vAlpha);
+  }
+`
 
 function AscendingStreams() {
   const pointsRef = useRef<THREE.Points>(null)
   const { radiusX, radiusY } = CONFIG.cathedral
-  const positions = useMemo(
-    () => createParticlePositions(ASCENDING_COUNT, radiusX * 0.5, -radiusY * 0.7, -radiusY * 0.3),
-    [radiusX, radiusY],
+
+  const { positions, speeds, offsets } = useMemo(() => {
+    const positions = new Float32Array(ASCENDING_COUNT * 3)
+    const speeds = new Float32Array(ASCENDING_COUNT)
+    const offsets = new Float32Array(ASCENDING_COUNT)
+    for (let i = 0; i < ASCENDING_COUNT; i++) {
+      const i3 = i * 3
+      const angle = Math.random() * Math.PI * 2
+      const radius = Math.random() * radiusX * 0.5
+      positions[i3] = Math.cos(angle) * radius
+      positions[i3 + 1] = -radiusY * 0.7 + Math.random() * radiusY * 1.4
+      positions[i3 + 2] = Math.sin(angle) * radius
+      speeds[i] = 0.3 + Math.random() * 0.7
+      offsets[i] = Math.random()
+    }
+    return { positions, speeds, offsets }
+  }, [radiusX, radiusY])
+
+  const uniforms = useMemo(
+    () => ({
+      uColor: { value: new THREE.Color('#a29bfe') },
+      uOpacity: { value: 0.0 },
+      uSize: { value: 4.0 },
+    }),
+    [],
   )
-  const speeds = useMemo(() => {
-    const s = new Float32Array(ASCENDING_COUNT)
-    for (let i = 0; i < ASCENDING_COUNT; i++) s[i] = 0.3 + Math.random() * 0.7
-    return s
-  }, [])
 
   useFrame((_, delta) => {
     if (!pointsRef.current) return
     const dt = Math.min(delta, 0.1)
     const { sessionDepth } = useStore.getState().presence
     const mandalaStage = useStore.getState().mandalaStage
-    const stageMultiplier = (['seed', 'flower', 'metatron', 'sriYantra'] as const).indexOf(mandalaStage) + 1
+    const stageMultiplier =
+      (['seed', 'flower', 'metatron', 'sriYantra'] as const).indexOf(mandalaStage) + 1
+    const elapsed = useStore.getState().sessionElapsed
+    const themeKey = useStore.getState().settings.theme
+    const theme = getActiveThemeColors(themeKey, elapsed)
+
     const pos = pointsRef.current.geometry.attributes.position as THREE.BufferAttribute
     const arr = pos.array as Float32Array
     const mandalaY = radiusY * 0.7
+
     for (let i = 0; i < ASCENDING_COUNT; i++) {
       const i3 = i * 3
       arr[i3 + 1] += speeds[i] * dt * stageMultiplier * 0.5
@@ -123,29 +97,49 @@ function AscendingStreams() {
       }
     }
     pos.needsUpdate = true
-    const mat = pointsRef.current.material as THREE.PointsMaterial
-    mat.opacity = sessionDepth * 0.8
-    mat.size = 0.02 + (stageMultiplier / 4) * 0.03
+
+    uniforms.uOpacity.value = sessionDepth * 0.8
+    uniforms.uColor.value.copy(theme.particle)
   })
 
+  const geometry = useMemo(() => {
+    const geo = new THREE.BufferGeometry()
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+    geo.setAttribute('aSpeed', new THREE.BufferAttribute(speeds, 1))
+    geo.setAttribute('aOffset', new THREE.BufferAttribute(offsets, 1))
+    return geo
+  }, [positions, speeds, offsets])
+
   return (
-    <points ref={pointsRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          args={[positions, 3]}
-        />
-      </bufferGeometry>
-      <pointsMaterial
-        size={0.02}
-        color="#55efc4"
+    <points ref={pointsRef} geometry={geometry}>
+      <shaderMaterial
+        vertexShader={ascendingVertexShader}
+        fragmentShader={ascendingFragmentShader}
+        uniforms={uniforms}
         transparent
-        opacity={0}
         depthWrite={false}
         blending={THREE.AdditiveBlending}
-        sizeAttenuation
       />
     </points>
+  )
+}
+
+function AmbientDustSparkles() {
+  const { radiusX, radiusY } = CONFIG.cathedral
+  const elapsed = useStore((s) => s.sessionElapsed)
+  const themeKey = useStore((s) => s.settings.theme)
+  const theme = getActiveThemeColors(themeKey, elapsed)
+
+  return (
+    <Sparkles
+      count={400}
+      scale={[radiusX * 1.6, radiusY * 1.4, radiusX * 1.6]}
+      size={3}
+      speed={0.2}
+      opacity={0.6}
+      color={theme.particle}
+      noise={0.5}
+    />
   )
 }
 
@@ -154,7 +148,7 @@ export function ParticleField() {
   const particleLayers = CONFIG.quality[qualityTier].particles
   return (
     <>
-      <AmbientDust />
+      <AmbientDustSparkles />
       {particleLayers >= 2 && <AscendingStreams />}
     </>
   )
