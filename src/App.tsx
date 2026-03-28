@@ -18,7 +18,7 @@ const playerY = -CONFIG.cathedral.radiusY * 0.35
 function DesktopControls() {
   const session = useXR((xr) => xr.session)
   if (session) return null
-  return <OrbitControls target={[0, playerY + 2, 0]} />
+  return <OrbitControls target={[0, playerY + 5, 0]} />
 }
 
 export default function App() {

@@ -32,7 +32,10 @@ export function generateCrystalPlacements(
     const py = ny * radiusY
     const pz = nz * radiusX
     if (py < -radiusY * 0.75) continue
+    // Normal points inward (toward center)
     const normal = new THREE.Vector3(-nx, -ny, -nz).normalize()
+    // Push crystal base into the wall so it appears to grow from the surface
+    const embedDepth = 0.3 + random() * 0.4
     const up = new THREE.Vector3(0, 1, 0)
     const quat = new THREE.Quaternion().setFromUnitVectors(up, normal)
     const euler = new THREE.Euler().setFromQuaternion(quat)
@@ -43,7 +46,11 @@ export function generateCrystalPlacements(
     const scaleY = baseScale * heightScale * (0.8 + random() * 1.5)
     const scaleXZ = baseScale * heightScale * (0.3 + random() * 0.4)
     placements.push({
-      position: new THREE.Vector3(px, py, pz),
+      position: new THREE.Vector3(
+        px + normal.x * embedDepth,
+        py + normal.y * embedDepth,
+        pz + normal.z * embedDepth,
+      ),
       rotation: euler,
       scale: new THREE.Vector3(scaleXZ, scaleY, scaleXZ),
       surfaceNormal: normal,

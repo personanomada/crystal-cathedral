@@ -52,18 +52,18 @@ export function LightingRig() {
     const themeKey = useStore.getState().settings.theme
     const theme = getActiveThemeColors(themeKey, elapsed)
     if (ambientRef.current) {
-      ambientRef.current.intensity = 0.08 + sessionDepth * 0.1
+      ambientRef.current.intensity = 0.15 + sessionDepth * 0.15
     }
     lightsRef.current.forEach((light, i) => {
       if (!light) return
       light.color.copy(theme.lights[i % theme.lights.length])
-      light.intensity = 1.0 + sessionDepth * 4
+      light.intensity = 2.0 + sessionDepth * 4
     })
   })
 
   return (
     <>
-      <ambientLight ref={ambientRef} intensity={0.08} />
+      <ambientLight ref={ambientRef} intensity={0.15} />
       {lightPositions.map((pos, i) => (
         <pointLight
           key={i}
@@ -71,8 +71,8 @@ export function LightingRig() {
             if (el) lightsRef.current[i] = el
           }}
           position={pos}
-          intensity={1.0}
-          distance={25}
+          intensity={2.0}
+          distance={30}
           decay={2}
         />
       ))}

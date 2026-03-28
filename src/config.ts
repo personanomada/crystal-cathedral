@@ -70,7 +70,7 @@ export const CONFIG = {
   cathedral: {
     radiusX: 6,
     radiusY: 12.5,
-    subdivisions: 6,
+    subdivisions: 5,
   },
   breathing: {
     slow: 10,

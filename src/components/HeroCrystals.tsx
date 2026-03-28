@@ -86,24 +86,24 @@ export function HeroCrystals() {
             ref={(mat) => {
               if (mat) materialsRef.current[i] = mat
             }}
-            color="#c0b8ff"
-            transmission={0.85}
-            thickness={2.0}
-            roughness={0.02}
-            ior={2.2}
-            iridescence={1}
-            iridescenceIOR={1.5}
-            iridescenceThicknessRange={[100, 400]}
-            attenuationColor="#6c5ce7"
-            attenuationDistance={1.5}
+            color="#d8d0ff"
+            transmission={0.7}
+            thickness={1.5}
+            roughness={0.08}
+            ior={1.8}
+            iridescence={0.3}
+            iridescenceIOR={1.3}
+            iridescenceThicknessRange={[200, 500]}
+            attenuationColor="#8070c0"
+            attenuationDistance={2.0}
             emissive="#6c5ce7"
-            emissiveIntensity={0.5}
+            emissiveIntensity={0.8}
             transparent
-            envMapIntensity={3.0}
-            metalness={0.05}
-            specularIntensity={1}
-            clearcoat={1}
-            clearcoatRoughness={0.02}
+            envMapIntensity={2.0}
+            metalness={0.1}
+            specularIntensity={0.8}
+            clearcoat={0.5}
+            clearcoatRoughness={0.1}
           />
         </mesh>
       ))}

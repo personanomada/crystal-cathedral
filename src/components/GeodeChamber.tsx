@@ -77,10 +77,12 @@ export function GeodeChamber() {
   return (
     <mesh geometry={geometry}>
       <meshStandardMaterial
-        color="#0d0d1a"
-        roughness={0.95}
-        metalness={0.05}
+        color="#1a1028"
+        roughness={0.85}
+        metalness={0.15}
         side={THREE.DoubleSide}
+        emissive="#0a0510"
+        emissiveIntensity={0.5}
       />
     </mesh>
   )

@@ -134,14 +134,14 @@ export function CrystalFormation() {
           frustumCulled={false}
         >
           <meshStandardMaterial
-            color="#5a4a8a"
-            emissive="#6c5ce7"
-            emissiveIntensity={0.3}
-            roughness={0.1}
-            metalness={0.8}
+            color="#6a5a9a"
+            emissive="#7c6cf7"
+            emissiveIntensity={0.5}
+            roughness={0.12}
+            metalness={0.7}
             transparent
-            opacity={0.95}
-            envMapIntensity={2.0}
+            opacity={0.92}
+            envMapIntensity={1.5}
           />
         </instancedMesh>
       ))}
