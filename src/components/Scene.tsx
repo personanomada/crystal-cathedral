@@ -1,6 +1,7 @@
 import { GeodeChamber } from './GeodeChamber'
 import { CrystalFormation } from './CrystalFormation'
 import { HeroCrystals } from './HeroCrystals'
+import { CrystalClusters } from './CrystalClusters'
 import { SacredMandala } from './SacredMandala'
 import { LightingRig } from './LightingRig'
 import { ParticleField } from './ParticleField'
@@ -31,6 +32,7 @@ export function Scene() {
       <GeodeChamber />
       <CrystalFormation />
       <HeroCrystals />
+      <CrystalClusters />
       <SacredMandala />
       <ParticleField />
       <PostProcessing />

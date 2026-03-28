@@ -1,44 +1,54 @@
 import { useMemo, useRef, useEffect } from 'react'
 import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
+import { useGLTF } from '@react-three/drei'
 import { useStore } from '../store/useStore'
 import {
   generateCrystalPlacements,
   CrystalPlacement,
 } from '../utils/crystalDistribution'
 import { getActiveThemeColors } from './LightingRig'
+import type { GLTF } from 'three-stdlib'
+
+// -------------------------------------------------------------------------
+// Type helpers
+// -------------------------------------------------------------------------
+type CrystalPackGLTF = GLTF & {
+  nodes: Record<string, THREE.Mesh>
+  materials: Record<string, THREE.Material>
+}
 
 const CRYSTAL_COUNT = 600
 const TEMP_OBJECT = new THREE.Object3D()
 const TEMP_COLOR = new THREE.Color()
 
-/**
- * Create a crystal-shaped geometry using a vertically stretched OctahedronGeometry.
- * Natural crystal point shape — no manual mesh merging needed.
- * scaleY stretches the octahedron to make it look like a crystal point.
- */
+// -------------------------------------------------------------------------
+// Fallback procedural geometries (used until model loads or if it fails)
+// -------------------------------------------------------------------------
 function createCrystalGeometry(scaleY: number, baseRadius: number): THREE.BufferGeometry {
   const geo = new THREE.OctahedronGeometry(baseRadius, 0)
-  // Scale the positions on Y to make it tall and pointy
-  const pos = geo.attributes.position
+  const pos = geo.attributes.position as THREE.BufferAttribute
   for (let i = 0; i < pos.count; i++) {
     pos.setY(i, pos.getY(i) * scaleY)
   }
-  // Shift so the base sits at y=0
   geo.translate(0, baseRadius * scaleY, 0)
   geo.computeVertexNormals()
   return geo
 }
 
-// Three crystal types using stretched octahedra:
-// tall-thin, medium, stubby
-const CRYSTAL_GEOMETRIES = [
-  () => createCrystalGeometry(3.0, 0.08),  // Tall thin — stretched 3x
-  () => createCrystalGeometry(2.0, 0.11),  // Medium — stretched 2x
-  () => createCrystalGeometry(1.5, 0.13),  // Stubby — stretched 1.5x
+// Procedural fallback shapes for groups 0 and 1
+const FALLBACK_GEOMETRIES = [
+  () => createCrystalGeometry(3.0, 0.08), // Tall thin
+  () => createCrystalGeometry(2.0, 0.11), // Medium
 ]
 
-// Color palettes — more saturated and bright for better visual impact
+// Model mesh node name for group 2 — the "Crystal1.1" shape from crystal_pack
+// Object_132 is the mesh child of Crystal1.1_64 parent node
+const MODEL_CRYSTAL_NODE = 'Object_132'
+
+// -------------------------------------------------------------------------
+// Color palettes
+// -------------------------------------------------------------------------
 const CRYSTAL_HUES = [
   { h: 0.75, s: 0.8, l: 0.35 },  // Vivid purple
   { h: 0.78, s: 0.7, l: 0.40 },  // Bright blue-purple
@@ -51,12 +61,37 @@ const CRYSTAL_HUES = [
 export function CrystalFormation() {
   const meshRefs = useRef<(THREE.InstancedMesh | null)[]>([])
 
+  // Load the crystal_pack model to borrow a geometry for group 2
+  const gltf = useGLTF('/models/crystal_pack/scene.gltf') as CrystalPackGLTF
+
   const allPlacements = useMemo(() => generateCrystalPlacements(CRYSTAL_COUNT), [])
   const groups = useMemo(() => {
     const g: CrystalPlacement[][] = [[], [], []]
     allPlacements.forEach((p, i) => g[i % 3].push(p))
     return g
   }, [allPlacements])
+
+  // Build the 3 geometries: 2 procedural + 1 from loaded model
+  const geometries = useMemo(() => {
+    const procedural = FALLBACK_GEOMETRIES.map((fn) => fn())
+
+    // Try to get the model geometry for group 2
+    let modelGeo: THREE.BufferGeometry | null = null
+    try {
+      const node = gltf?.nodes?.[MODEL_CRYSTAL_NODE]
+      if (node && node.geometry) {
+        modelGeo = node.geometry as THREE.BufferGeometry
+      }
+    } catch {
+      // ignore — will fall back to procedural
+    }
+
+    return [
+      procedural[0],
+      procedural[1],
+      modelGeo ?? createCrystalGeometry(1.5, 0.13), // stubby fallback
+    ]
+  }, [gltf])
 
   useEffect(() => {
     groups.forEach((group, gi) => {
@@ -69,7 +104,6 @@ export function CrystalFormation() {
         TEMP_OBJECT.updateMatrix()
         mesh.setMatrixAt(i, TEMP_OBJECT.matrix)
 
-        // Varied crystal colors
         const palette = CRYSTAL_HUES[Math.floor(Math.random() * CRYSTAL_HUES.length)]
         TEMP_COLOR.setHSL(
           palette.h + (Math.random() - 0.5) * 0.05,
@@ -100,8 +134,6 @@ export function CrystalFormation() {
     })
   })
 
-  const geometries = useMemo(() => CRYSTAL_GEOMETRIES.map((fn) => fn()), [])
-
   return (
     <>
       {geometries.map((geo, i) => (
@@ -128,3 +160,6 @@ export function CrystalFormation() {
     </>
   )
 }
+
+// Preload — shared with HeroCrystals so there's no double fetch
+useGLTF.preload('/models/crystal_pack/scene.gltf')
