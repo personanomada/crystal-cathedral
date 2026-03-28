@@ -38,16 +38,16 @@ export function PostProcessing() {
     return (
       <EffectComposer>
         <Bloom
-          intensity={2.5}
-          luminanceThreshold={0.3}
-          luminanceSmoothing={0.9}
+          intensity={3.0}
+          luminanceThreshold={0.2}
+          luminanceSmoothing={0.95}
           mipmapBlur
           resolutionX={bloomResolution}
           resolutionY={bloomResolution}
         />
         <Vignette
-          offset={0.3}
-          darkness={0.7}
+          offset={0.25}
+          darkness={0.8}
           blendFunction={BlendFunction.NORMAL}
         />
         <ToneMapping
@@ -67,27 +67,27 @@ export function PostProcessing() {
   return (
     <EffectComposer>
       <Bloom
-        intensity={2.5}
-        luminanceThreshold={0.3}
-        luminanceSmoothing={0.9}
+        intensity={3.5}
+        luminanceThreshold={0.2}
+        luminanceSmoothing={0.95}
         mipmapBlur
         resolutionX={bloomResolution}
         resolutionY={bloomResolution}
       />
       <ChromaticAberration
         blendFunction={BlendFunction.NORMAL}
-        offset={[0.003, 0.003] as unknown as import('three').Vector2}
+        offset={[0.002, 0.002] as unknown as import('three').Vector2}
         radialModulation={false}
         modulationOffset={0}
       />
       <Vignette
-        offset={0.3}
-        darkness={0.7}
+        offset={0.25}
+        darkness={0.8}
         blendFunction={BlendFunction.NORMAL}
       />
       <Noise
         blendFunction={BlendFunction.SOFT_LIGHT}
-        opacity={0.15}
+        opacity={0.08}
       />
       <ToneMapping
         blendFunction={BlendFunction.NORMAL}
