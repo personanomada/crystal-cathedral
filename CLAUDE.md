@@ -301,6 +301,25 @@ A floating panel (use `@react-three/uikit` or custom 3D UI) with:
 
 ## Working with Claude Code
 
+### Context7 — always use for docs
+**IMPORTANT:** Always use Context7 (MCP) to look up documentation before writing code that uses any library in this project. Do NOT rely on training data for API signatures, component props, or configuration options — they change frequently. This applies to all key dependencies including but not limited to:
+
+- `@react-three/fiber`, `@react-three/drei`, `@react-three/xr`, `@react-three/postprocessing`, `@react-three/uikit`
+- `three`, `postprocessing`
+- `tone` (Tone.js)
+- `zustand`
+- `vite`, `vite-plugin-glsl`
+
+**When to query Context7:**
+- Before using any component, hook, or API from these libraries
+- When configuring Vite plugins or build settings
+- When writing shader integration code (e.g. `shaderMaterial` from drei)
+- When setting up WebXR features via `@react-three/xr`
+- When encountering unexpected behavior or deprecation warnings
+- When adding new dependencies to the project
+
+**How:** Use `resolve-library-id` first to get the library ID, then `query-docs` with a specific topic. Be specific in queries (e.g. "MeshPhysicalMaterial transmission" not just "materials").
+
 ### Prompting strategy
 This project is shader-heavy and visual. When working with Claude Code:
 
@@ -309,6 +328,7 @@ This project is shader-heavy and visual. When working with Claude Code:
 3. **Use the R3F/Drei ecosystem.** Don't write raw Three.js when Drei has a component for it.
 4. **Shader iteration:** Ask Claude to write GLSL shaders, paste the visual result back and ask for adjustments. Shaders are perfect for LLM-assisted development.
 5. **Performance:** If framerate drops, ask Claude to profile and suggest the specific bottleneck.
+6. **Look it up, don't guess.** Always use Context7 to verify API usage before writing code. Training data goes stale — docs don't.
 
 ### Key Claude Code commands you'll use
 ```bash

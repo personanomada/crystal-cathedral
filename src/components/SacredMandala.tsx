@@ -47,7 +47,7 @@ export function SacredMandala() {
 
     if (lightRef.current) {
       lightRef.current.color.copy(stageColor)
-      lightRef.current.intensity = sessionDepth * 5
+      lightRef.current.intensity = 1 + sessionDepth * 4
     }
   })
 

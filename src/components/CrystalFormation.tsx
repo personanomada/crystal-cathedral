@@ -59,7 +59,7 @@ export function CrystalFormation() {
     const breathValue = Math.sin(breathPhase * Math.PI * 2) * 0.5 + 0.5
     const sessionDepth = useStore.getState().presence.sessionDepth
     const emissiveIntensity =
-      (0.3 + breathValue * 0.7) * (0.2 + sessionDepth * 0.8)
+      (0.3 + breathValue * 0.7) * (0.4 + sessionDepth * 0.6)
     const elapsed = useStore.getState().sessionElapsed
     const themeKey = useStore.getState().settings.theme
     const theme = getActiveThemeColors(themeKey, elapsed)
