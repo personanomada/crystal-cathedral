@@ -2,3 +2,5 @@ node_modules/
 dist/
 .superpowers/
 .worktrees/
+.DS_Store
+models/
