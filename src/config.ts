@@ -89,7 +89,7 @@ export const CONFIG = {
   },
   locomotion: {
     maxDriftSpeed: 0.3,
-    boundaryDistance: 4,
+    boundaryDistance: 2,
   },
   interaction: {
     crystalTouchRadius: 0.3,

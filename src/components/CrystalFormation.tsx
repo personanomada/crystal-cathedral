@@ -6,6 +6,7 @@ import {
   generateCrystalPlacements,
   CrystalPlacement,
 } from '../utils/crystalDistribution'
+import { getActiveThemeColors } from './LightingRig'
 
 const CRYSTAL_COUNT = 600
 const TEMP_OBJECT = new THREE.Object3D()
@@ -59,10 +60,14 @@ export function CrystalFormation() {
     const sessionDepth = useStore.getState().presence.sessionDepth
     const emissiveIntensity =
       (0.3 + breathValue * 0.7) * (0.2 + sessionDepth * 0.8)
+    const elapsed = useStore.getState().sessionElapsed
+    const themeKey = useStore.getState().settings.theme
+    const theme = getActiveThemeColors(themeKey, elapsed)
     meshRefs.current.forEach((mesh) => {
       if (!mesh) return
       const mat = mesh.material as THREE.MeshStandardMaterial
       mat.emissiveIntensity = emissiveIntensity
+      mat.emissive.copy(theme.emissive)
     })
   })
 

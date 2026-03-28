@@ -4,6 +4,7 @@ import { useFrame } from '@react-three/fiber'
 import { useStore } from '../store/useStore'
 import { generateCrystalPlacements } from '../utils/crystalDistribution'
 import { CONFIG } from '../config'
+import { getActiveThemeColors } from './LightingRig'
 
 export function HeroCrystals() {
   const materialsRef = useRef<THREE.MeshPhysicalMaterial[]>([])
@@ -33,9 +34,13 @@ export function HeroCrystals() {
     const breathPhase = useStore.getState().breathPhase
     const breathValue = Math.sin(breathPhase * Math.PI * 2) * 0.5 + 0.5
     const sessionDepth = useStore.getState().presence.sessionDepth
+    const elapsed = useStore.getState().sessionElapsed
+    const themeKey = useStore.getState().settings.theme
+    const theme = getActiveThemeColors(themeKey, elapsed)
     materialsRef.current.forEach((mat) => {
       mat.emissiveIntensity =
         (0.5 + breathValue * 0.5) * (0.3 + sessionDepth * 0.7)
+      mat.emissive.copy(theme.emissive)
     })
   })
 

@@ -15,14 +15,11 @@ export function ReactivityEngine() {
   const lastGazeHit = useRef(new THREE.Vector3())
   const gazeStableTime = useRef(0)
   const sessionStartTime = useRef<number | null>(null)
-  const setPresence = useStore.getState().setPresence
-  const setSessionElapsed = useStore.getState().setSessionElapsed
-
   useFrame((state, delta) => {
     const dt = Math.min(delta, 0.1)
     if (sessionStartTime.current === null) sessionStartTime.current = state.clock.elapsedTime
     const elapsed = state.clock.elapsedTime - sessionStartTime.current
-    setSessionElapsed(elapsed)
+    useStore.getState().setSessionElapsed(elapsed)
 
     const sessionMode = useStore.getState().settings.sessionMode
     const arcDuration = CONFIG.session.arcDuration
@@ -57,7 +54,7 @@ export function ReactivityEngine() {
     const rawEngagement = 1 - rawStillness
     const engagement = engagementSmoother.current.update(rawEngagement, dt)
 
-    setPresence({ stillness, focus, engagement, sessionDepth })
+    useStore.getState().setPresence({ stillness, focus, engagement, sessionDepth })
   })
 
   return null
