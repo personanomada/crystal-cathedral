@@ -12,6 +12,7 @@ import { GazeDrift } from '../interaction/GazeDrift'
 import { GazeFocus } from '../interaction/GazeFocus'
 import { HandInteraction } from '../interaction/HandInteraction'
 import { AudioManager } from '../audio/AudioManager'
+import { LoveMessage } from './LoveMessage'
 
 export function Scene() {
   return (
@@ -31,6 +32,7 @@ export function Scene() {
       <Crystals />
       <SacredMandala />
       <ParticleField />
+      <LoveMessage />
       <PostProcessing />
     </>
   )

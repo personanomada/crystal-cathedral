@@ -1,0 +1,49 @@
+[     607ms] [WARNING] The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio @ http://localhost:5173/crystal-cathedral/node_modules/.vite/deps/tone.js?v=81b2dfed:7611
+[     607ms] [WARNING] The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio @ http://localhost:5173/crystal-cathedral/node_modules/.vite/deps/tone.js?v=81b2dfed:2868
+[     611ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5173/models/crystal_pack/scene.gltf:0
+[     709ms] [WARNING] WARNING: Multiple instances of Three.js being imported. @ http://localhost:5173/crystal-cathedral/node_modules/.vite/deps/emulate-BZEE5VIU.js?v=abdfa9bd:29532
+[     712ms] [WARNING] WARNING: Multiple instances of Three.js being imported. @ http://localhost:5173/crystal-cathedral/node_modules/.vite/deps/emulate-BZEE5VIU.js?v=abdfa9bd:54796
+[     779ms] [WARNING] THREE.THREE.Clock: This module has been deprecated. Please use THREE.Timer instead. @ http://localhost:5173/crystal-cathedral/node_modules/.vite/deps/chunk-65BBDVDB.js?v=abdfa9bd:745
+[    1128ms] Error: Could not load /models/crystal_pack/scene.gltf: fetch for "http://localhost:5173/models/crystal_pack/scene.gltf" responded with 404: Not Found
+    at http://localhost:5173/crystal-cathedral/node_modules/.vite/deps/chunk-GMXPFGA5.js?v=abdfa9bd:1297:38
+    at Object._onError [as onError] (http://localhost:5173/crystal-cathedral/node_modules/.vite/deps/@react-three_drei.js?v=4eb96b9a:26717:9)
+    at http://localhost:5173/crystal-cathedral/node_modules/.vite/deps/chunk-65BBDVDB.js?v=abdfa9bd:23751:40
+[    1130ms] Error: Could not load /models/crystal_pack/scene.gltf: fetch for "http://localhost:5173/models/crystal_pack/scene.gltf" responded with 404: Not Found
+    at http://localhost:5173/crystal-cathedral/node_modules/.vite/deps/chunk-GMXPFGA5.js?v=abdfa9bd:1297:38
+    at Object._onError [as onError] (http://localhost:5173/crystal-cathedral/node_modules/.vite/deps/@react-three_drei.js?v=4eb96b9a:26717:9)
+    at http://localhost:5173/crystal-cathedral/node_modules/.vite/deps/chunk-65BBDVDB.js?v=abdfa9bd:23751:40
+[    1130ms] [WARNING] %s
+
+%s
+ An error occurred in the <CanvasImpl> component. Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries. @ http://localhost:5173/crystal-cathedral/node_modules/.vite/deps/chunk-RSZBRKH3.js?v=abdfa9bd:6697
+[   35640ms] [WARNING] The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio @ http://localhost:5173/crystal-cathedral/node_modules/.vite/deps/tone.js?v=81b2dfed:7611
+[   35640ms] [WARNING] The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio @ http://localhost:5173/crystal-cathedral/node_modules/.vite/deps/tone.js?v=81b2dfed:2868
+[   35642ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5173/models/crystal_pack/scene.gltf:0
+[   35681ms] [WARNING] WARNING: Multiple instances of Three.js being imported. @ http://localhost:5173/crystal-cathedral/node_modules/.vite/deps/emulate-BZEE5VIU.js?v=abdfa9bd:29532
+[   35682ms] [WARNING] WARNING: Multiple instances of Three.js being imported. @ http://localhost:5173/crystal-cathedral/node_modules/.vite/deps/emulate-BZEE5VIU.js?v=abdfa9bd:54796
+[   35741ms] [WARNING] THREE.THREE.Clock: This module has been deprecated. Please use THREE.Timer instead. @ http://localhost:5173/crystal-cathedral/node_modules/.vite/deps/chunk-65BBDVDB.js?v=abdfa9bd:745
+[   36075ms] Error: Could not load /models/crystal_pack/scene.gltf: fetch for "http://localhost:5173/models/crystal_pack/scene.gltf" responded with 404: Not Found
+    at http://localhost:5173/crystal-cathedral/node_modules/.vite/deps/chunk-GMXPFGA5.js?v=abdfa9bd:1297:38
+    at Object._onError [as onError] (http://localhost:5173/crystal-cathedral/node_modules/.vite/deps/@react-three_drei.js?v=4eb96b9a:26717:9)
+    at http://localhost:5173/crystal-cathedral/node_modules/.vite/deps/chunk-65BBDVDB.js?v=abdfa9bd:23751:40
+[   36076ms] Error: Could not load /models/crystal_pack/scene.gltf: fetch for "http://localhost:5173/models/crystal_pack/scene.gltf" responded with 404: Not Found
+    at http://localhost:5173/crystal-cathedral/node_modules/.vite/deps/chunk-GMXPFGA5.js?v=abdfa9bd:1297:38
+    at Object._onError [as onError] (http://localhost:5173/crystal-cathedral/node_modules/.vite/deps/@react-three_drei.js?v=4eb96b9a:26717:9)
+    at http://localhost:5173/crystal-cathedral/node_modules/.vite/deps/chunk-65BBDVDB.js?v=abdfa9bd:23751:40
+[   36076ms] [WARNING] %s
+
+%s
+ An error occurred in the <CanvasImpl> component. Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries. @ http://localhost:5173/crystal-cathedral/node_modules/.vite/deps/chunk-RSZBRKH3.js?v=abdfa9bd:6697
+[   38956ms] [WARNING] THREE.THREE.Clock: This module has been deprecated. Please use THREE.Timer instead. @ http://localhost:5173/crystal-cathedral/node_modules/.vite/deps/chunk-65BBDVDB.js?v=abdfa9bd:745
+[   39289ms] [WARNING] The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio @ http://localhost:5173/crystal-cathedral/node_modules/.vite/deps/tone.js?v=81b2dfed:1145
+[   39289ms] [WARNING] The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio @ http://localhost:5173/crystal-cathedral/node_modules/.vite/deps/tone.js?v=81b2dfed:1145
+[   39290ms] [WARNING] The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio @ http://localhost:5173/crystal-cathedral/node_modules/.vite/deps/tone.js?v=81b2dfed:1145
+[   39290ms] [WARNING] The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio @ http://localhost:5173/crystal-cathedral/node_modules/.vite/deps/tone.js?v=81b2dfed:1145
+[  314715ms] [ERROR] WebSocket connection to 'ws://localhost:5173/crystal-cathedral/?token=WQw5a17XB_jq' failed:  @ http://localhost:5173/crystal-cathedral/@vite/client:801
+[  314773ms] [ERROR] WebSocket connection to 'ws://localhost:5173/crystal-cathedral/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:5173/crystal-cathedral/@vite/client:1034
+[  315775ms] [ERROR] WebSocket connection to 'ws://localhost:5173/crystal-cathedral/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:5173/crystal-cathedral/@vite/client:1034
+[  317812ms] [WARNING] WARNING: Multiple instances of Three.js being imported. @ http://localhost:5173/crystal-cathedral/node_modules/.vite/deps/emulate-BZEE5VIU.js?v=b98bfc64:29532
+[  317814ms] [WARNING] WARNING: Multiple instances of Three.js being imported. @ http://localhost:5173/crystal-cathedral/node_modules/.vite/deps/emulate-BZEE5VIU.js?v=b98bfc64:54796
+[  317910ms] [WARNING] THREE.THREE.Clock: This module has been deprecated. Please use THREE.Timer instead. @ http://localhost:5173/crystal-cathedral/node_modules/.vite/deps/chunk-65BBDVDB.js?v=b98bfc64:745

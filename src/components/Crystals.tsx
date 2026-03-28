@@ -67,7 +67,7 @@ const MODEL_NODES = ['Object_4', 'Object_132', 'Object_408']
 
 export function Crystals() {
   const materialsRef = useRef<THREE.MeshPhysicalMaterial[]>([])
-  const gltf = useGLTF('/models/crystal_pack/scene.gltf')
+  const gltf = useGLTF(`${import.meta.env.BASE_URL}models/crystal_pack/scene.gltf`)
 
   // Extract and normalize 3 crystal geometries from the model
   const geometries = useMemo(() => {
@@ -161,4 +161,4 @@ export function Crystals() {
   )
 }
 
-useGLTF.preload('/models/crystal_pack/scene.gltf')
+useGLTF.preload(`${import.meta.env.BASE_URL}models/crystal_pack/scene.gltf`)
