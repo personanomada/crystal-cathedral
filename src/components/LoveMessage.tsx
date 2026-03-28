@@ -1,4 +1,4 @@
-import { useRef, useMemo, useState, useEffect } from 'react'
+import { useRef, useMemo, useState } from 'react'
 import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
 
@@ -176,7 +176,6 @@ export function LoveMessage() {
 
   const geometry = useMemo(() => {
     const geo = new THREE.BufferGeometry()
-    const count = textPositions.length / 3
     geo.setAttribute('position', new THREE.BufferAttribute(textPositions, 3))
     geo.setAttribute('aTarget', new THREE.BufferAttribute(targets, 3))
     geo.setAttribute('aSpeed', new THREE.BufferAttribute(speeds, 1))
