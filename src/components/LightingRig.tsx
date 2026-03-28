@@ -73,7 +73,7 @@ export function LightingRig() {
           decay={2}
         />
       ))}
-      <Environment preset="night" environmentIntensity={0.3} />
+      <Environment preset="studio" environmentIntensity={0.4} background={false} />
     </>
   )
 }
