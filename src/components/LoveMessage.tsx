@@ -211,17 +211,13 @@ export function LoveMessage() {
       uniforms.uOpacity.value = Math.min(1, elapsed / 1.0) // fade in over first second
     }
     else if (elapsed < t2) {
-      // Phase 2: Hold text
+      // Phase 2: Hold text — camera stays locked on text
       uniforms.uGatherProgress.value = 1.0
       uniforms.uScatterProgress.value = 0
       uniforms.uOpacity.value = 1.0
-      // Start revealing cathedral partway through
-      if (elapsed > t2 - 1.5) {
-        setIntroComplete(true)
-      }
     }
     else if (elapsed < t3) {
-      // Phase 3: Explode outward like fireflies
+      // Phase 3: Explode outward like fireflies — NOW release the camera
       const t = (elapsed - t2) / SCATTER_DURATION
       uniforms.uGatherProgress.value = 1.0
       uniforms.uScatterProgress.value = t
