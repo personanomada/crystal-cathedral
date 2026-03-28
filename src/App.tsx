@@ -1,10 +1,12 @@
-import { Canvas } from '@react-three/fiber'
+import { useRef } from 'react'
+import { Canvas, useFrame } from '@react-three/fiber'
 import { createXRStore, XR, useXR } from '@react-three/xr'
 import { OrbitControls } from '@react-three/drei'
 import { Scene } from './components/Scene'
 import { DesktopOverlay } from './ui/DesktopOverlay'
 import { EnterVRButton } from './ui/EnterVRButton'
 import { CONFIG } from './config'
+import { useStore } from './store/useStore'
 
 const xrStore = createXRStore({
   emulate: 'metaQuest3',
@@ -17,8 +19,27 @@ const playerY = -CONFIG.cathedral.radiusY * 0.35
 
 function DesktopControls() {
   const session = useXR((xr) => xr.session)
+  const controlsRef = useRef<any>(null)
+  const introComplete = useStore((s) => s.introComplete)
+  const targetY = useRef(playerY) // Start looking straight ahead (same Y as camera)
+
+  useFrame((_, delta) => {
+    if (!controlsRef.current) return
+    // Smoothly transition camera target upward after intro
+    const goalY = introComplete ? playerY + 5 : playerY
+    targetY.current += (goalY - targetY.current) * Math.min(1, delta * 0.5)
+    controlsRef.current.target.set(0, targetY.current, -2)
+    controlsRef.current.update()
+  })
+
   if (session) return null
-  return <OrbitControls target={[0, playerY + 5, 0]} />
+  return (
+    <OrbitControls
+      ref={controlsRef}
+      target={[0, playerY, -2]}
+      enableDamping={false}
+    />
+  )
 }
 
 export default function App() {
